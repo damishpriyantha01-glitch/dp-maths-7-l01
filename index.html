@@ -762,6 +762,13 @@
               <span>📄</span>
               <span>වාර්තාව PDF ලෙස බාගත කරගන්න</span>
             </button>
+            <button
+              id="btn-submit-results"
+              class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-sm sm:text-base shadow-lg flex items-center gap-2 transition cursor-pointer"
+            >
+              <span>📤</span>
+              <span>Damish ට results යවන්න</span>
+            </button>
           </div>
 
           <!-- Summary Cards -->
@@ -1648,6 +1655,56 @@
     document.getElementById('btn-download-pdf').addEventListener('click', () => {
       updateProgressAndSummary();
       window.print();
+    });
+
+    // Submit results to Damish (hidden Google Form POST, no separate form for student)
+    document.getElementById('btn-submit-results').addEventListener('click', () => {
+      updateProgressAndSummary();
+      const actMarks = state.act1Score + state.act2Score + state.act3Score;
+      const gameMarks = state.gameScore;
+      const qs = getQuizStats();
+      const totalObtained = actMarks + gameMarks + qs.marks;
+
+      const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLScIgTNAGaxlpftAcYs7UEHOlWQaAFyLOLnjsr_-SOO3h6_szg/formResponse';
+      const params = new URLSearchParams();
+      params.append('entry.2031237213', state.studentName || '');
+      params.append('entry.1775135095', state.displayInstitute || '');
+      params.append('entry.333783767', String(actMarks));
+      params.append('entry.845988717', String(gameMarks));
+      params.append('entry.2047431219', String(qs.marks));
+      params.append('entry.655862801', String(qs.correctCount));
+      params.append('entry.167173175', String(totalObtained));
+
+      // Use a hidden form + iframe to avoid CORS and page navigation
+      const iframeName = 'hidden-submit-frame';
+      let iframe = document.getElementById(iframeName);
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = iframeName;
+        iframe.name = iframeName;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+      }
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = formUrl;
+      form.target = iframeName;
+      for (const [k, v] of params.entries()) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = k;
+        input.value = v;
+        form.appendChild(input);
+      }
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+
+      const btn = document.getElementById('btn-submit-results');
+      const original = btn.innerHTML;
+      btn.innerHTML = '<span>✅</span><span>යවන ලදී!</span>';
+      btn.disabled = true;
+      setTimeout(() => { btn.innerHTML = original; btn.disabled = false; }, 3000);
     });
   </script>
 </body>
