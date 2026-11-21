@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DP Maths — 7 වසර: 1 පාඩම සමමිතිය</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Typography & Base Styling */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --navy-deep: #07132b;
+      --indigo-dark: #0e224c;
+      --blue-royal: #1d4ed8;
+      --cyan-accent: #06b6d4;
+      --gold-accent: #eab308;
+    }
+
+    body {
+      font-family: 'Noto Sans Sinhala', 'Inter', sans-serif;
+      background: linear-gradient(135deg, #07132b 0%, #0e224c 55%, #112a5e 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .glass-panel {
+      background: rgba(15, 32, 68, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+    }
+
+    .light-card {
+      background: #ffffff;
+      color: #0f172a;
+    }
+
+    .nav-tab.active {
+      background: linear-gradient(135deg, #0284c7, #1d4ed8);
+      color: #ffffff;
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.35);
+      border-color: rgba(125, 211, 252, 0.5);
+    }
+
+    .sym-axis-line {
+      stroke-dasharray: 6 5;
+    }
+
+    /* Print / PDF Report Styles */
+    #pdf-report-view {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm;
+      }
+
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-size: 11pt;
+      }
+
+      #app-shell, #onboarding-screen, .no-print {
+        display: none !important;
+      }
+
+      #pdf-report-view {
+        display: block !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
+      }
+
+      .print-break-avoid {
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-cyan-400 selection:text-slate-950">
+
+  <!-- ==================== 1. STUDENT ONBOARDING SCREEN ==================== -->
+  <section id="onboarding-screen" class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+    <div class="w-full max-w-xl glass-panel rounded-3xl p-6 sm:p-10 shadow-2xl border border-cyan-400/25">
+      <!-- DP Maths Brand Header -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-cyan-300 text-xs sm:text-sm font-semibold mb-3">
+          <span>7 වසර</span>
+          <span>•</span>
+          <span>1 පාඩම — සමමිතිය</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          DP <span class="text-cyan-400">Maths</span>
+        </h1>
+        <p class="text-base sm:text-lg font-bold text-amber-300 mt-1">දමිෂ් ප්‍රියමන්ත</p>
+        <p class="text-xs sm:text-sm text-slate-300 mt-0.5">ජීවිතයම හදන තැන</p>
+      </div>
+
+      <!-- Student Information Form -->
+      <form id="onboarding-form" class="space-y-5" novalidate>
+        <div>
+          <label for="student-name" class="block text-sm font-bold text-cyan-200 mb-2">
+            ඔබගේ නම ඇතුළත් කරන්න <span class="text-rose-400">*</span>
+          </label>
+          <input
+            type="text"
+            id="student-name"
+            placeholder="උදා: කවිඳු පෙරේරා"
+            class="w-full px-4 py-3.5 rounded-xl bg-slate-900/80 border border-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 text-white placeholder-slate-400 outline-none transition"
+            required
+          />
+        </div>
+
+        <div>
+          <label for="student-institute" class="block text-sm font-bold text-cyan-200 mb-2">
+            අධ්‍යාපන ආයතනය තෝරන්න <span class="text-rose-400">*</span>
+          </label>
+          <select
+            id="student-institute"
+            class="w-full px-4 py-3.5 rounded-xl bg-slate-900/80 border border-slate-600 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 text-white outline-none transition"
+            required
+          >
+            <option value="" disabled selected>-- ආයතනය තෝරන්න --</option>
+            <option value="ගුරුකුල උසස් අධ්‍යාපන ආයතනය">ගුරුකුල උසස් අධ්‍යාපන ආයතනය</option>
+            <option value="සරසවිය උසස් අධ්‍යාපන ආයතනය">සරසවිය උසස් අධ්‍යාපන ආයතනය</option>
+            <option value="වහරක ම.වි">වහරක ම.වි</option>
+            <option value="වෙනත්">වෙනත්</option>
+          </select>
+        </div>
+
+        <!-- Conditional Custom Institute Field -->
+        <div id="custom-institute-wrapper" class="hidden">
+          <label for="custom-institute-input" class="block text-sm font-bold text-amber-300 mb-2">
+            ඔබගේ අධ්‍යාපන ආයතනයේ නම ඇතුළත් කරන්න <span class="text-rose-400">*</span>
+          </label>
+          <input
+            type="text"
+            id="custom-institute-input"
+            placeholder="ආයතනයේ නම ලියන්න..."
+            class="w-full px-4 py-3.5 rounded-xl bg-slate-900/80 border border-amber-400/50 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 text-white placeholder-slate-400 outline-none transition"
+          />
+        </div>
+
+        <!-- Validation Message Box -->
+        <div id="onboarding-error" class="hidden p-3.5 rounded-xl bg-rose-500/20 border border-rose-400/50 text-rose-200 text-sm font-medium"></div>
+
+        <button
+          type="submit"
+          class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-extrabold text-base sm:text-lg shadow-lg shadow-blue-900/50 transition transform active:scale-[0.99] cursor-pointer"
+        >
+          පාඩම ආරම්භ කරමු →
+        </button>
+      </form>
+
+      <p class="text-center text-xs text-slate-400 mt-6">
+        අන්තර්ජාලය නොමැතිව වුවද සම්පූර්ණයෙන් ක්‍රියාත්මක වන DP Maths ස්වයං-ඉගෙනුම් පද්ධතිය
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================== 2. MAIN LEARNING APPLICATION SHELL ==================== -->
+  <div id="app-shell" class="hidden min-h-screen flex flex-col">
+    <!-- Top Header & Student Info Bar -->
+    <header class="glass-panel border-b border-cyan-400/20 sticky top-0 z-30 no-print">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-700 flex items-center justify-center font-extrabold text-slate-950 text-lg shadow">
+            DP
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-white text-base sm:text-lg">DP Maths</span>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-semibold">7 වසර • 1 පාඩම</span>
+            </div>
+            <p class="text-xs text-cyan-200">දමිෂ් ප්‍රියමන්ත — ජීවිතයම හදන තැන</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+          <div class="px-3 py-1.5 rounded-xl bg-slate-900/75 border border-slate-700">
+            <span class="text-slate-400">ශිෂ්‍යයා:</span>
+            <span id="header-student-name" class="font-bold text-white ml-1">-</span>
+          </div>
+          <div class="px-3 py-1.5 rounded-xl bg-slate-900/75 border border-slate-700">
+            <span class="text-slate-400">ආයතනය:</span>
+            <span id="header-student-institute" class="font-bold text-cyan-300 ml-1">-</span>
+          </div>
+          <div class="px-3 py-1.5 rounded-xl bg-blue-600/25 border border-blue-400/40">
+            <span class="text-slate-300">ප්‍රගතිය:</span>
+            <span id="header-progress-pct" class="font-extrabold text-amber-300 ml-1">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (5 Core Sections) -->
+      <nav aria-label="ප්‍රධාන මෙනුව" class="max-w-7xl mx-auto px-4 sm:px-6 pb-3 flex gap-2 overflow-x-auto">
+        <button data-tab="lesson" class="nav-tab active shrink-0 px-4 py-2.5 rounded-xl border border-slate-700 text-xs sm:text-sm font-bold transition cursor-pointer">
+          1. පාඩම
+        </button>
+        <button data-tab="activities" class="nav-tab shrink-0 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-200 hover:bg-slate-800 text-xs sm:text-sm font-bold transition cursor-pointer">
+          2. ක්‍රියාකාරකම්
+        </button>
+        <button data-tab="game" class="nav-tab shrink-0 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-200 hover:bg-slate-800 text-xs sm:text-sm font-bold transition cursor-pointer">
+          3. ක්‍රීඩාව
+        </button>
+        <button data-tab="quiz" class="nav-tab shrink-0 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-200 hover:bg-slate-800 text-xs sm:text-sm font-bold transition cursor-pointer">
+          4. ප්‍රශ්නාවලිය
+        </button>
+        <button data-tab="progress" class="nav-tab shrink-0 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-200 hover:bg-slate-800 text-xs sm:text-sm font-bold transition cursor-pointer">
+          5. මගේ ප්‍රගතිය
+        </button>
+      </nav>
+    </header>
+
+    <!-- Overall Progress Strip -->
+    <div class="bg-slate-950/60 border-b border-slate-800 no-print">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex items-center gap-4">
+        <span class="text-xs text-slate-300 shrink-0 font-semibold">සමස්ත පාඩම් ප්‍රගතිය</span>
+        <div class="flex-1 h-2.5 rounded-full bg-slate-800 overflow-hidden">
+          <div id="top-progress-bar" class="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-amber-400 transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <span id="top-score-badge" class="text-xs font-extrabold text-cyan-300 shrink-0">ලකුණු: 0</span>
+      </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8 no-print">
+
+      <!-- ==================== TAB 1: පාඩම ==================== -->
+      <section id="tab-lesson" class="tab-content space-y-8">
+        <!-- A. පාඩම හඳුනාගනිමු -->
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-cyan-400/25">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-3 max-w-3xl">
+              <span class="inline-block px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold">
+                A. පාඩම හඳුනාගනිමු
+              </span>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+                1 පාඩම — සමමිතිය (Bilateral Symmetry)
+              </h2>
+              <p class="text-slate-200 text-sm sm:text-base leading-relaxed">
+                පරිසරයේ ඇති සමනලයන්, ශාක පත්‍ර සහ විවිධ අලංකාර නිර්මාණ එක සමාන කොටස් දෙකකට බෙදා දැක්විය හැකි ලක්ෂණයකින් යුක්ත වේ. මෙම පාඩමෙන් අපි තල රූපවල <strong>ද්විපාර්ශ්වික සමමිතිය</strong> ගැන ඉගෙන ගනිමු.
+              </p>
+            </div>
+            <div class="bg-slate-900/80 border border-slate-700 rounded-2xl p-4 sm:p-5 lg:w-80 shrink-0">
+              <h3 class="text-sm font-extrabold text-amber-300 mb-2.5">ඉගෙනුම් අරමුණු</h3>
+              <ul class="space-y-2 text-xs sm:text-sm text-slate-200 list-disc list-inside">
+                <li>ද්විපාර්ශ්වික සමමිතිය සහිත තල රූප හඳුනා ගැනීම</li>
+                <li>සමමිති අක්ෂ හඳුනා ගැනීම සහ ඇඳීම</li>
+                <li>අනුරූප ශීර්ෂ (A', B', C', D') භාවිතයෙන් සමමිතික රූප සම්පූර්ණ කිරීම</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- B. සංකල්පය තේරුම් ගනිමු: 1.1 ද්විපාර්ශ්වික සමමිතිය & 1.2 සමමිති අක්ෂ -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Concept Card 1: Definition & Folding -->
+          <div class="light-card rounded-3xl p-6 sm:p-7 shadow-xl space-y-4">
+            <span class="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold">
+              B. සංකල්පය තේරුම් ගනිමු • 1.1
+            </span>
+            <h3 class="text-xl font-extrabold text-slate-900">ද්විපාර්ශ්වික සමමිතිය සහ සමමිති අක්ෂය</h3>
+            <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+              තල රූපයක් යම් සරල රේඛාවක් ඔස්සේ නැමීමෙන් <strong>එකිනෙක සම්පාත වන</strong> (එක මත එක වැටෙන) පරිදි කොටස් දෙකකට බෙදේ නම්, එම තල රූපය <strong>ද්විපාර්ශ්වික සමමිතික තල රූපයක්</strong> වේ. එම නැමුම් රේඛාව <strong>සමමිති අක්ෂයක්</strong> ලෙස හැඳින්වේ.
+            </p>
+
+            <!-- Interactive Fold Toggle SVG -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="text-xs font-bold text-slate-600">අන්තර්ක්‍රියාකාරී නිරූපණය: කඩ ඉර ඔස්සේ නමන්න</span>
+                <button id="btn-toggle-fold" class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition cursor-pointer">
+                  දෙකට නමා බලන්න
+                </button>
+              </div>
+              <svg id="svg-fold-demo" viewBox="0 0 320 170" class="w-full h-44 mx-auto">
+                <!-- Grid background subtle -->
+                <rect x="0" y="0" width="320" height="170" rx="12" fill="#f8fafc" />
+                <!-- Left half -->
+                <g id="fold-left-half" style="transition: transform 0.5s ease; transform-origin: 160px 85px;">
+                  <polygon points="160,22 80,62 105,92 65,122 160,148" fill="#38bdf8" fill-opacity="0.45" stroke="#0284c7" stroke-width="2.5" />
+                </g>
+                <!-- Right half -->
+                <g id="fold-right-half" style="transition: transform 0.5s ease; transform-origin: 160px 85px;">
+                  <polygon points="160,22 240,62 215,92 255,122 160,148" fill="#818cf8" fill-opacity="0.45" stroke="#4f46e5" stroke-width="2.5" />
+                </g>
+                <!-- Axis line -->
+                <line x1="160" y1="10" x2="160" y2="160" stroke="#e11d48" stroke-width="2.5" class="sym-axis-line" />
+                <text x="168" y="24" fill="#be123c" font-size="11" font-weight="bold">සමමිති අක්ෂය</text>
+              </svg>
+              <p id="fold-status-text" class="text-xs text-center font-semibold text-slate-600 mt-1">
+                දැනට රූපය දිග හැර ඇත — දෙපස කොටස් සමාන වේ.
+              </p>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs sm:text-sm text-amber-950">
+              <strong>වැදගත් කරුණ:</strong> රූපයක් රේඛාවකින් හැඩයෙන් හා වර්ගඵලයෙන් සමාන කොටස් දෙකකට බෙදුණත්, නැමූ විට <strong>සම්පාත නොවේ නම්</strong> එම රේඛාව සමමිති අක්ෂයක් <strong>නොවේ</strong>.
+            </div>
+          </div>
+
+          <!-- Concept Card 2: Multiple Axes vs Single Axis -->
+          <div class="light-card rounded-3xl p-6 sm:p-7 shadow-xl space-y-4">
+            <span class="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-bold">
+              B. සංකල්පය තේරුම් ගනිමු • 1.2
+            </span>
+            <h3 class="text-xl font-extrabold text-slate-900">සමමිති අක්ෂ ගණන</h3>
+            <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+              සමහර ද්විපාර්ශ්වික සමමිතික රූපවලට ඇත්තේ <strong>සමමිති අක්ෂ 1ක්</strong> පමණි. තවත් රූපවලට සමමිති අක්ෂ <strong>එකකට වැඩි ගණනක්</strong> (උදා: සමචතුරස්‍රයකට 4ක්, වෘත්තයකට අපරිමිත සංඛ්‍යාවක්) පැවතිය හැකිය.
+            </p>
+
+            <!-- SVG Comparison: Isosceles Triangle (1 axis) vs Square (4 axes) -->
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
+                <svg viewBox="0 0 140 120" class="w-full h-28 mx-auto">
+                  <polygon points="70,15 25,100 115,100" fill="#fde68a" stroke="#d97706" stroke-width="2" />
+                  <line x1="70" y1="8" x2="70" y2="112" stroke="#dc2626" stroke-width="2" class="sym-axis-line" />
+                </svg>
+                <p class="text-xs font-extrabold text-slate-800">සමද්විපාද ත්‍රිකෝණය</p>
+                <p class="text-xs font-bold text-rose-600">සමමිති අක්ෂ: 1</p>
+              </div>
+              <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
+                <svg viewBox="0 0 140 120" class="w-full h-28 mx-auto">
+                  <rect x="30" y="20" width="80" height="80" fill="#bae6fd" stroke="#0284c7" stroke-width="2" />
+                  <line x1="70" y1="10" x2="70" y2="110" stroke="#dc2626" stroke-width="1.6" class="sym-axis-line" />
+                  <line x1="20" y1="60" x2="120" y2="60" stroke="#dc2626" stroke-width="1.6" class="sym-axis-line" />
+                  <line x1="30" y1="20" x2="110" y2="100" stroke="#dc2626" stroke-width="1.6" class="sym-axis-line" />
+                  <line x1="110" y1="20" x2="30" y2="100" stroke="#dc2626" stroke-width="1.6" class="sym-axis-line" />
+                </svg>
+                <p class="text-xs font-extrabold text-slate-800">සමචතුරස්‍රය</p>
+                <p class="text-xs font-bold text-rose-600">සමමිති අක්ෂ: 4</p>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-cyan-50 border border-cyan-200 text-xs sm:text-sm text-cyan-950">
+              <strong>අනුරූප ශීර්ෂ (A', B', C', D'):</strong> කොටු දැලක සමමිති අක්ෂයෙන් එක් පසෙක ඇති ශීර්ෂයකට සමාන ලම්බ දුරකින් අනෙක් පස පිහිටි ලක්ෂ්‍යය එහි <strong>අනුරූප ශීර්ෂය</strong> වේ.
+            </div>
+          </div>
+        </div>
+
+        <!-- C. උදාහරණ බලමු (Worked Example from PDF Page 10 - නිදසුන 1) -->
+        <div class="light-card rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+              C. උදාහරණ බලමු • නිදසුන 1
+            </span>
+            <span class="text-xs font-semibold text-slate-500">පෙළපොත ඇසුරෙන්</span>
+          </div>
+
+          <h3 class="text-xl font-extrabold text-slate-900">
+            කොටු දැලක අනුරූප ශීර්ෂ හඳුනාගෙන සමමිතික රූපය සම්පූර්ණ කිරීම
+          </h3>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+            <!-- Grid Diagram with A,B,C,D and A',B',C',D' -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+              <svg viewBox="0 0 360 240" class="w-full h-auto">
+                <!-- 12x8 grid (each cell 24px, offset x=36, y=24) -->
+                <g stroke="#cbd5e1" stroke-width="1">
+                  <!-- Vertical lines -->
+                  <line x1="36" y1="24" x2="36" y2="216" />
+                  <line x1="60" y1="24" x2="60" y2="216" />
+                  <line x1="84" y1="24" x2="84" y2="216" />
+                  <line x1="108" y1="24" x2="108" y2="216" />
+                  <line x1="132" y1="24" x2="132" y2="216" />
+                  <line x1="156" y1="24" x2="156" y2="216" />
+                  <line x1="180" y1="24" x2="180" y2="216" />
+                  <line x1="204" y1="24" x2="204" y2="216" />
+                  <line x1="228" y1="24" x2="228" y2="216" />
+                  <line x1="252" y1="24" x2="252" y2="216" />
+                  <line x1="276" y1="24" x2="276" y2="216" />
+                  <line x1="300" y1="24" x2="300" y2="216" />
+                  <line x1="324" y1="24" x2="324" y2="216" />
+                  <!-- Horizontal lines -->
+                  <line x1="36" y1="24" x2="324" y2="24" />
+                  <line x1="36" y1="48" x2="324" y2="48" />
+                  <line x1="36" y1="72" x2="324" y2="72" />
+                  <line x1="36" y1="96" x2="324" y2="96" />
+                  <line x1="36" y1="120" x2="324" y2="120" />
+                  <line x1="36" y1="144" x2="324" y2="144" />
+                  <line x1="36" y1="168" x2="324" y2="168" />
+                  <line x1="36" y1="192" x2="324" y2="192" />
+                  <line x1="36" y1="216" x2="324" y2="216" />
+                </g>
+
+                <!-- Axis at x = 180 (col 6) -->
+                <line x1="180" y1="24" x2="180" y2="216" stroke="#dc2626" stroke-width="2.5" class="sym-axis-line" />
+
+                <!-- Right side vertices: D(col 9, row 2 -> x=252, y=72), C(col 10, row 5 -> x=276, y=144), B(col 8, row 5 -> x=228, y=144), A(col 8, row 7 -> x=228, y=192) -->
+                <polyline points="180,72 252,72 276,144 228,144 228,192 180,192" fill="none" stroke="#9333ea" stroke-width="2.8" />
+                <!-- Left side reflected vertices: D'(col 3 -> x=108, y=72), C'(col 2 -> x=84, y=144), B'(col 4 -> x=132, y=144), A'(col 4 -> x=132, y=192) -->
+                <polyline points="180,72 108,72 84,144 132,144 132,192 180,192" fill="none" stroke="#0284c7" stroke-width="2.8" stroke-dasharray="4 2" />
+
+                <!-- Right points & labels -->
+                <circle cx="252" cy="72" r="4" fill="#9333ea" />
+                <text x="258" y="68" font-size="13" font-weight="bold" fill="#0f172a">D</text>
+                <circle cx="276" cy="144" r="4" fill="#9333ea" />
+                <text x="282" y="148" font-size="13" font-weight="bold" fill="#0f172a">C</text>
+                <circle cx="228" cy="144" r="4" fill="#9333ea" />
+                <text x="215" y="139" font-size="13" font-weight="bold" fill="#0f172a">B</text>
+                <circle cx="228" cy="192" r="4" fill="#9333ea" />
+                <text x="234" y="196" font-size="13" font-weight="bold" fill="#0f172a">A</text>
+
+                <!-- Left reflected points & labels -->
+                <circle cx="108" cy="72" r="4" fill="#0284c7" />
+                <text x="90" y="68" font-size="13" font-weight="bold" fill="#0369a1">D'</text>
+                <circle cx="84" cy="144" r="4" fill="#0284c7" />
+                <text x="64" y="148" font-size="13" font-weight="bold" fill="#0369a1">C'</text>
+                <circle cx="132" cy="144" r="4" fill="#0284c7" />
+                <text x="137" y="139" font-size="13" font-weight="bold" fill="#0369a1">B'</text>
+                <circle cx="132" cy="192" r="4" fill="#0284c7" />
+                <text x="112" y="196" font-size="13" font-weight="bold" fill="#0369a1">A'</text>
+              </svg>
+            </div>
+
+            <!-- Step-by-Step Solution -->
+            <div class="space-y-3 text-sm text-slate-700">
+              <div class="p-3.5 rounded-2xl bg-slate-100">
+                <p class="font-bold text-slate-900">පියවර 1 — A සහ B ශීර්ෂවල දුර:</p>
+                <p>සමමිති අක්ෂයේ සිට A සහ B ශීර්ෂවලට ඇති දුර <strong>කොටු 3</strong> බැගිනි. එබැවින් සමමිති අක්ෂයෙන් වමට කොටු 3ක දුරින් <strong>A'</strong> සහ <strong>B'</strong> ලකුණු කරමු.</p>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-slate-100">
+                <p class="font-bold text-slate-900">පියවර 2 — C ශීර්ෂයේ දුර:</p>
+                <p>සමමිති අක්ෂයේ සිට C ශීර්ෂයට ඇති දුර <strong>කොටු 4</strong>කි (දකුණු කොටුව 10 සිට අක්ෂය 6 දක්වා). එබැවින් වමට කොටු 4ක දුරින් <strong>C'</strong> ලකුණු කරමු.</p>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-slate-100">
+                <p class="font-bold text-slate-900">පියවර 3 — D ශීර්ෂයේ දුර සහ යා කිරීම:</p>
+                <p>සමමිති අක්ෂයේ සිට D ශීර්ෂයට ඇති දුර <strong>කොටු 3</strong>කි. වමට කොටු 3ක දුරින් <strong>D'</strong> ලකුණු කර ශීර්ෂ පිළිවෙළින් යා කළ විට සමමිතික රූපය ලැබේ.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- D. උත්සාහ කර බලමු + Next Tab CTA -->
+        <div class="glass-panel rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border border-cyan-400/25">
+          <div>
+            <span class="text-xs font-bold text-amber-300">D. උත්සාහ කර බලමු</span>
+            <h3 class="text-lg font-extrabold text-white mt-0.5">සංකල්ප තේරුණාද? දැන් ක්‍රියාකාරකම් වලට යමු!</h3>
+            <p class="text-xs sm:text-sm text-slate-300">ප්‍රායෝගික ක්‍රියාකාරකම් 3ක් මගින් ඔබේ දැනුම පරීක්ෂා කර ලකුණු රැස් කරන්න.</p>
+          </div>
+          <button onclick="switchTab('activities')" class="shrink-0 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-extrabold text-sm shadow-lg transition cursor-pointer">
+            ක්‍රියාකාරකම් වෙත →
+          </button>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 2: ක්‍රියාකාරකම් ==================== -->
+      <section id="tab-activities" class="tab-content hidden space-y-8">
+        <div class="glass-panel rounded-3xl p-6 border border-cyan-400/25">
+          <h2 class="text-2xl font-extrabold text-white">මඟ පෙන්වන අන්තර්ක්‍රියාකාරී ක්‍රියාකාරකම්</h2>
+          <p class="text-sm text-slate-300 mt-1">
+            එක් එක් ක්‍රියාකාරකම සම්පූර්ණ කර <strong>පිළිතුර පරීක්ෂා කරන්න</strong> ඔබන්න. සෑම ක්‍රියාකාරකමකටම ලකුණු 10 බැගින් (මුළු ලකුණු 30) හිමි වේ.
+          </p>
+        </div>
+
+        <!-- Activity 1: Identify Bilateral Symmetric Figures -->
+        <div class="light-card rounded-3xl p-6 sm:p-7 shadow-xl space-y-5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-extrabold">ක්‍රියාකාරකම 1 • ලකුණු 10</span>
+            <span id="act1-status" class="text-xs font-bold text-slate-500">සම්පූර්ණ කර නැත</span>
+          </div>
+          <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">
+            ද්විපාර්ශ්වික සමමිතික රූප හඳුනා ගනිමු
+          </h3>
+          <p class="text-sm text-slate-700">
+            පහත දැක්වෙන රූප අතුරින් <strong>ද්විපාර්ශ්වික සමමිතික රූප</strong> (සමමිති අක්ෂයක් ඇති රූප) සියල්ල තෝරා පරීක්ෂා කරන්න.
+          </p>
+
+          <div id="act1-options" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <!-- Shape A: Isosceles Triangle (Symmetric - 1 axis) -->
+            <button type="button" data-shape="A" class="act1-item p-3 rounded-2xl border-2 border-slate-200 hover:border-blue-400 bg-slate-50 text-center transition cursor-pointer">
+              <svg viewBox="0 0 100 80" class="w-full h-16 mx-auto">
+                <polygon points="50,10 18,70 82,70" fill="#93c5fd" stroke="#1d4ed8" stroke-width="2" />
+              </svg>
+              <span class="block text-xs font-extrabold text-slate-800 mt-1">(අ) සමද්විපාද ත්‍රිකෝණය</span>
+            </button>
+
+            <!-- Shape B: Scalene / Tilted L-like non-symmetric -->
+            <button type="button" data-shape="B" class="act1-item p-3 rounded-2xl border-2 border-slate-200 hover:border-blue-400 bg-slate-50 text-center transition cursor-pointer">
+              <svg viewBox="0 0 100 80" class="w-full h-16 mx-auto">
+                <polygon points="20,15 55,15 55,48 80,48 80,68 20,68" fill="#fca5a5" stroke="#dc2626" stroke-width="2" />
+              </svg>
+              <span class="block text-xs font-extrabold text-slate-800 mt-1">(ආ) අසමමිතික හැඩය</span>
+            </button>
+
+            <!-- Shape C: Symmetric Heart / Leaf -->
+            <button type="button" data-shape="C" class="act1-item p-3 rounded-2xl border-2 border-slate-200 hover:border-blue-400 bg-slate-50 text-center transition cursor-pointer">
+              <svg viewBox="0 0 100 80" class="w-full h-16 mx-auto">
+                <path d="M50,70 C20,48 15,22 33,15 C42,12 48,18 50,24 C52,18 58,12 67,15 C85,22 80,48 50,70 Z" fill="#86efac" stroke="#16a34a" stroke-width="2" />
+              </svg>
+              <span class="block text-xs font-extrabold text-slate-800 mt-1">(ඇ) පත්‍ර හැඩය</span>
+            </button>
+
+            <!-- Shape D: Parallelogram (Not bilaterally symmetric) -->
+            <button type="button" data-shape="D" class="act1-item p-3 rounded-2xl border-2 border-slate-200 hover:border-blue-400 bg-slate-50 text-center transition cursor-pointer">
+              <svg viewBox="0 0 100 80" class="w-full h-16 mx-auto">
+                <polygon points="30,20 82,20 68,62 16,62" fill="#fcd34d" stroke="#d97706" stroke-width="2" />
+              </svg>
+              <span class="block text-xs font-extrabold text-slate-800 mt-1">(ඈ) සමාන්තරාස්‍රය</span>
+            </button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <button id="btn-check-act1" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition cursor-pointer">
+              පිළිතුර පරීක්ෂා කරන්න
+            </button>
+            <div id="act1-feedback" class="text-sm font-bold"></div>
+          </div>
+        </div>
+
+        <!-- Activity 2: Distance to Corresponding Vertex -->
+        <div class="light-card rounded-3xl p-6 sm:p-7 shadow-xl space-y-5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-extrabold">ක්‍රියාකාරකම 2 • ලකුණු 10</span>
+            <span id="act2-status" class="text-xs font-bold text-slate-500">සම්පූර්ණ කර නැත</span>
+          </div>
+          <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">
+            අනුරූප ශීර්ෂයේ දුර සොයමු
+          </h3>
+          <p class="text-sm text-slate-700">
+            කොටු දැලේ සිරස් කඩ ඉර <strong>සමමිති අක්ෂය</strong> වේ. රූපයේ <strong>P</strong> ශීර්ෂය සමමිති අක්ෂයේ සිට <strong>කොටු 4</strong>ක් දකුණින් පිහිටා ඇත. එහි අනුරූප ශීර්ෂය වන <strong>P'</strong>, සමමිති අක්ෂයේ සිට වමට <strong>කොටු කීයක</strong> දුරින් පිහිටිය යුතුද?
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3">
+              <svg viewBox="0 0 280 120" class="w-full h-28">
+                <!-- Grid -->
+                <g stroke="#cbd5e1" stroke-width="1">
+                  <line x1="20" y1="20" x2="260" y2="20" />
+                  <line x1="20" y1="60" x2="260" y2="60" />
+                  <line x1="20" y1="100" x2="260" y2="100" />
+                  <line x1="40" y1="10" x2="40" y2="110" />
+                  <line x1="60" y1="10" x2="60" y2="110" />
+                  <line x1="80" y1="10" x2="80" y2="110" />
+                  <line x1="100" y1="10" x2="100" y2="110" />
+                  <line x1="120" y1="10" x2="120" y2="110" />
+                  <line x1="140" y1="10" x2="140" y2="110" />
+                  <line x1="160" y1="10" x2="160" y2="110" />
+                  <line x1="180" y1="10" x2="180" y2="110" />
+                  <line x1="200" y1="10" x2="200" y2="110" />
+                  <line x1="220" y1="10" x2="220" y2="110" />
+                  <line x1="240" y1="10" x2="240" y2="110" />
+                </g>
+                <!-- Axis at x=140 -->
+                <line x1="140" y1="8" x2="140" y2="112" stroke="#e11d48" stroke-width="2.5" class="sym-axis-line" />
+                <!-- P at x=220 (4*20=80px right), y=60 -->
+                <line x1="140" y1="60" x2="220" y2="60" stroke="#0284c7" stroke-width="2" />
+                <circle cx="220" cy="60" r="4.5" fill="#1d4ed8" />
+                <text x="226" y="55" font-size="13" font-weight="bold" fill="#0f172a">P</text>
+                <!-- P' marker -->
+                <circle cx="60" cy="60" r="4.5" fill="#0d9488" />
+                <text x="52" y="50" font-size="13" font-weight="bold" fill="#0f766e">P'</text>
+              </svg>
+            </div>
+
+            <div class="space-y-3">
+              <label for="act2-input" class="block text-sm font-bold text-slate-800">
+                කොටු ගණන (සංඛ්‍යාවක් ලෙස ඇතුළත් කරන්න):
+              </label>
+              <div class="flex flex-wrap items-center gap-3">
+                <input
+                  type="number"
+                  id="act2-input"
+                  min="0"
+                  max="20"
+                  placeholder="කොටු ගණන"
+                  class="w-36 px-4 py-2.5 rounded-xl border-2 border-slate-300 focus:border-blue-600 outline-none text-slate-900 font-bold"
+                />
+                <button id="btn-check-act2" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition cursor-pointer">
+                  පිළිතුර පරීක්ෂා කරන්න
+                </button>
+              </div>
+              <div id="act2-feedback" class="text-sm font-bold"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity 3: Interactive Mirror Grid Completion -->
+        <div class="light-card rounded-3xl p-6 sm:p-7 shadow-xl space-y-5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="px-3 py-1 rounded-full bg-cyan-100 text-cyan-800 text-xs font-extrabold">ක්‍රියාකාරකම 3 • ලකුණු 10</span>
+            <span id="act3-status" class="text-xs font-bold text-slate-500">සම්පූර්ණ කර නැත</span>
+          </div>
+          <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">
+            කොටු දැලේ ද්විපාර්ශ්වික සමමිතික රූපය සම්පූර්ණ කරමු
+          </h3>
+          <p class="text-sm text-slate-700">
+            රතු කඩ ඉර <strong>සමමිති අක්ෂය</strong> වේ. දකුණු පස නිල් පැහැයෙන් පාට කර ඇති කොටුවලට අනුරූප වන <strong>වම් පස කොටු</strong> මත click/tap කර සමමිතික රූපය සම්පූර්ණ කරන්න.
+          </p>
+
+          <!-- 6 rows x 6 cols interactive grid (cols 0,1,2 = left of axis; cols 3,4,5 = right of axis; axis between col 2 and col 3) -->
+          <div class="overflow-x-auto">
+            <div id="mirror-grid-container" class="inline-grid grid-cols-6 gap-1 p-3 bg-slate-100 rounded-2xl border border-slate-300"></div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <button id="btn-check-act3" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition cursor-pointer">
+              පිළිතුර පරීක්ෂා කරන්න
+            </button>
+            <button id="btn-reset-act3" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-sm font-bold transition cursor-pointer">
+              නැවත සකසන්න
+            </button>
+            <div id="act3-feedback" class="text-sm font-bold"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: ක්‍රීඩාව ==================== -->
+      <section id="tab-game" class="tab-content hidden space-y-6">
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-cyan-400/25">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <span class="px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-extrabold">
+                සමමිති අභියෝගය • වට 8
+              </span>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-2">
+                සමමිති අක්ෂ සහ සමමිතිය සොයන ක්‍රීඩාව
+              </h2>
+              <p class="text-sm text-slate-300 mt-1">
+                වට 8ක් පුරා සමමිති අක්ෂ ගණන, අනුරූප දුර සහ සමමිතික ලක්ෂණ නිවැරදිව සොයා ලකුණු 80ක් ලබා ගන්න!
+              </p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="px-4 py-2.5 rounded-2xl bg-slate-900/80 border border-slate-700 text-center">
+                <div class="text-xs text-slate-400">වටය</div>
+                <div id="game-round-display" class="text-lg font-extrabold text-cyan-300">0 / 8</div>
+              </div>
+              <div class="px-4 py-2.5 rounded-2xl bg-slate-900/80 border border-slate-700 text-center">
+                <div class="text-xs text-slate-400">ලකුණු</div>
+                <div id="game-score-display" class="text-lg font-extrabold text-amber-300">0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Game Start / Active / Summary Area -->
+          <div id="game-start-panel" class="light-card rounded-3xl p-6 sm:p-8 text-center space-y-4">
+            <h3 class="text-xl font-extrabold text-slate-900">ක්‍රීඩාව ආරම්භ කිරීමට සූදානම්ද?</h3>
+            <p class="text-sm text-slate-600 max-w-xl mx-auto">
+              සෑම නිවැරදි පිළිතුරකටම <strong>ලකුණු 10</strong> බැගින් හිමි වේ. වේගයෙන් කලබල නොවී සිතා නිවැරදි පිළිතුර තෝරන්න.
+            </p>
+            <button id="btn-start-game" class="px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold text-base shadow-lg transition cursor-pointer">
+              ක්‍රීඩාව ආරම්භ කරන්න ▶
+            </button>
+          </div>
+
+          <div id="game-play-panel" class="hidden light-card rounded-3xl p-6 sm:p-8 space-y-5">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-500">
+              <span id="game-q-label">වටය 1</span>
+              <span id="game-streak-label" class="text-emerald-600">නිවැරදි අනුक्रमය: 0</span>
+            </div>
+            <h3 id="game-question-text" class="text-lg sm:text-xl font-extrabold text-slate-900"></h3>
+            <div id="game-options-box" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            <div id="game-feedback" class="text-sm font-bold min-h-[1.5rem]"></div>
+            <div class="pt-2">
+              <button id="btn-next-game-round" class="hidden px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition cursor-pointer">
+                ඊළඟ වටය →
+              </button>
+            </div>
+          </div>
+
+          <div id="game-summary-panel" class="hidden light-card rounded-3xl p-6 sm:p-8 text-center space-y-4">
+            <span class="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">ක්‍රීඩාව අවසන්!</span>
+            <h3 class="text-2xl font-extrabold text-slate-900">ඔබගේ ක්‍රීඩා ප්‍රතිඵලය</h3>
+            <p id="game-final-score-text" class="text-lg font-bold text-blue-700"></p>
+            <p id="game-final-msg" class="text-sm text-slate-700"></p>
+            <button id="btn-replay-game" class="px-6 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold transition cursor-pointer">
+              නැවත ක්‍රීඩා කරන්න
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: ප්‍රශ්නාවලිය ==================== -->
+      <section id="tab-quiz" class="tab-content hidden space-y-6">
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-cyan-400/25">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-extrabold">
+                පාඩම් ඇගයීම • ප්‍රශ්න 15
+              </span>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-2">
+                1 පාඩම: සමමිතිය — ප්‍රශ්නාවලිය
+              </h2>
+              <p class="text-sm text-slate-300 mt-1">
+                සෑම ප්‍රශ්නයකටම ලකුණු 2 බැගින් (මුළු ලකුණු 30). පිළිතුර තෝරා හෝ ඇතුළත් කර තහවුරු කරන්න.
+              </p>
+            </div>
+            <div class="px-4 py-2.5 rounded-2xl bg-slate-900/80 border border-slate-700 text-center">
+              <div class="text-xs text-slate-400">ප්‍රශ්නය</div>
+              <div id="quiz-progress-label" class="text-lg font-extrabold text-cyan-300">1 / 15</div>
+            </div>
+          </div>
+
+          <div id="quiz-card" class="light-card rounded-3xl p-6 sm:p-8 space-y-5">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-500">
+              <span id="quiz-q-type">බහුවරණ ප්‍රශ්නය</span>
+              <span id="quiz-score-live" class="text-blue-700">ලකුණු: 0 / 30</span>
+            </div>
+            <h3 id="quiz-question-text" class="text-lg sm:text-xl font-extrabold text-slate-900 leading-snug"></h3>
+
+            <!-- MCQ container -->
+            <div id="quiz-mcq-container" class="space-y-2.5"></div>
+
+            <!-- Numerical container -->
+            <div id="quiz-num-container" class="hidden space-y-2">
+              <label for="quiz-num-input" class="block text-sm font-bold text-slate-800">
+                සංඛ්‍යාත්මක පිළිතුර ඇතුළත් කරන්න:
+              </label>
+              <input
+                type="number"
+                id="quiz-num-input"
+                placeholder="පිළිතුර ලියන්න"
+                class="w-44 px-4 py-2.5 rounded-xl border-2 border-slate-300 focus:border-blue-600 outline-none text-slate-900 font-bold"
+              />
+            </div>
+
+            <div id="quiz-feedback" class="text-sm font-bold min-h-[1.5rem]"></div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+              <div class="flex gap-2">
+                <button id="btn-prev-quiz" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-sm font-bold transition cursor-pointer">
+                  ← පෙර ප්‍රශ්නය
+                </button>
+                <button id="btn-next-quiz" class="px-4 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-sm font-bold transition cursor-pointer">
+                  ඊළඟ ප්‍රශ්නය →
+                </button>
+              </div>
+              <button id="btn-submit-quiz-q" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition cursor-pointer">
+                පිළිතුර තහවුරු කරන්න
+              </button>
+            </div>
+          </div>
+
+          <!-- Quiz Final Result Box -->
+          <div id="quiz-summary-box" class="hidden mt-6 light-card rounded-3xl p-6 sm:p-8 space-y-4 border-2 border-emerald-400">
+            <h3 class="text-xl font-extrabold text-slate-900">ප්‍රශ්නාවලියේ සම්පූර්ණ ප්‍රතිඵලය</h3>
+            <p id="quiz-final-summary-text" class="text-base font-bold text-slate-800"></p>
+            <button onclick="switchTab('progress')" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-700 text-white text-sm font-bold cursor-pointer">
+              මගේ ප්‍රගතිය සහ PDF වාර්තාව බලන්න →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 5: මගේ ප්‍රගතිය ==================== -->
+      <section id="tab-progress" class="tab-content hidden space-y-6">
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-cyan-400/25 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-extrabold">
+                ශිෂ්‍ය කාර්යසාධන සාරාංශය
+              </span>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-2">මගේ ප්‍රගතිය</h2>
+            </div>
+            <button
+              id="btn-download-pdf"
+              class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-extrabold text-sm sm:text-base shadow-lg flex items-center gap-2 transition cursor-pointer"
+            >
+              <span>📄</span>
+              <span>වාර්තාව PDF ලෙස බාගත කරගන්න</span>
+            </button>
+          </div>
+
+          <!-- Summary Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Student & Progress Details -->
+            <div class="light-card rounded-3xl p-6 space-y-3 shadow">
+              <h3 class="text-lg font-extrabold text-slate-900 border-b border-slate-200 pb-2">ශිෂ්‍ය තොරතුරු සහ ඉගෙනුම් ප්‍රගතිය</h3>
+              <div class="text-sm space-y-2 text-slate-700">
+                <p><strong>ශිෂ්‍යයාගේ නම:</strong> <span id="sum-name">-</span></p>
+                <p><strong>අධ්‍යාපන ආයතනය:</strong> <span id="sum-institute">-</span></p>
+                <p><strong>පාඩමේ නම:</strong> 7 වසර — 1 පාඩම: සමමිතිය</p>
+                <p><strong>දිනය:</strong> <span id="sum-date">-</span></p>
+                <p><strong>සම්පූර්ණ කළ ක්‍රියාකාරකම්:</strong> <span id="sum-act-done">0 / 3</span></p>
+                <p><strong>සම්පූර්ණ නොකළ ක්‍රියාකාරකම්:</strong> <span id="sum-act-undone">3</span></p>
+                <p><strong>ක්‍රීඩාව සම්පූර්ණ කළේද?:</strong> <span id="sum-game-done">නැත</span></p>
+                <p><strong>ප්‍රශ්නාවලිය සම්පූර්ණ කළේද?:</strong> <span id="sum-quiz-done">නැත</span></p>
+                <p><strong>සමස්ත ප්‍රගතිය:</strong> <span id="sum-overall-pct" class="font-extrabold text-blue-700">0%</span></p>
+              </div>
+            </div>
+
+            <!-- Marks & Result Message -->
+            <div class="light-card rounded-3xl p-6 space-y-3 shadow">
+              <h3 class="text-lg font-extrabold text-slate-900 border-b border-slate-200 pb-2">ලකුණු සහ ප්‍රතිඵලය</h3>
+              <div class="text-sm space-y-2 text-slate-700">
+                <p><strong>ක්‍රියාකාරකම් සඳහා ලකුණු:</strong> <span id="sum-act-marks">0 / 30</span></p>
+                <p><strong>ක්‍රීඩාව සඳහා ලකුණු:</strong> <span id="sum-game-marks">0 / 80</span></p>
+                <p><strong>ප්‍රශ්නාවලිය සඳහා ලකුණු:</strong> <span id="sum-quiz-marks">0 / 30</span></p>
+                <p><strong>ප්‍රශ්නාවලිය — නිවැරදි / වැරදි:</strong> <span id="sum-quiz-counts">0 නිවැරදි, 0 වැරදි</span></p>
+                <p class="text-base pt-1">
+                  <strong>මුළු ලබාගත් ලකුණු:</strong>
+                  <span id="sum-total-marks" class="font-extrabold text-blue-700">0 / 140</span>
+                  (<span id="sum-total-pct" class="font-extrabold text-emerald-700">0%</span>)
+                </p>
+              </div>
+              <div id="sum-result-message" class="p-4 rounded-2xl bg-cyan-50 border border-cyan-200 text-sm font-bold text-cyan-950 mt-3">
+                ඔබගේ ඉගෙනුම් ගමන ආරම්භ කර ඇත. ක්‍රියාකාරකම්, ක්‍රීඩාව සහ ප්‍රශ්නාවලිය සම්පූර්ණ කරන්න.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-panel border-t border-slate-800 py-4 text-center text-xs text-slate-400 no-print">
+      DP Maths — දමිෂ් ප්‍රියමන්ත • ජීවිතයම හදන තැන • 7 වසර: සමමිතිය
+    </footer>
+  </div>
+
+  <!-- ==================== 3. CLEAN PRINT-TO-PDF REPORT VIEW ==================== -->
+  <section id="pdf-report-view" class="p-6 text-slate-900 bg-white">
+    <div class="border-b-2 border-slate-900 pb-4 mb-5 flex justify-between items-start print-break-avoid">
+      <div>
+        <h1 class="text-2xl font-extrabold text-slate-900">DP Maths</h1>
+        <p class="text-sm font-bold text-slate-700">දමිෂ් ප්‍රියමන්ත — ජීවිතයම හදන තැන</p>
+        <p class="text-base font-extrabold text-blue-900 mt-1">ශිෂ්‍ය ඉගෙනුම් වාර්තාව</p>
+      </div>
+      <div class="text-right text-xs text-slate-600">
+        <p><strong>පාඩම:</strong> 7 වසර — 1 පාඩම: සමමිතිය</p>
+        <p><strong>වාර්තා දිනය:</strong> <span id="pdf-date">-</span></p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mb-5 text-sm print-break-avoid">
+      <div class="p-3 border border-slate-300 rounded">
+        <p><strong>ශිෂ්‍යයාගේ නම:</strong> <span id="pdf-name">-</span></p>
+        <p class="mt-1"><strong>අධ්‍යාපන ආයතනය:</strong> <span id="pdf-institute">-</span></p>
+      </div>
+      <div class="p-3 border border-slate-300 rounded">
+        <p><strong>සමස්ත පාඩම් ප්‍රගතිය:</strong> <span id="pdf-overall-pct">0%</span></p>
+        <p class="mt-1"><strong>මුළු ලකුණු:</strong> <span id="pdf-total-marks">0 / 140</span> (<span id="pdf-total-pct">0%</span>)</p>
+      </div>
+    </div>
+
+    <table class="w-full border-collapse border border-slate-400 text-sm mb-6 print-break-avoid">
+      <thead>
+        <tr class="bg-slate-100">
+          <th class="border border-slate-400 p-2 text-left">අංශය</th>
+          <th class="border border-slate-400 p-2 text-left">තත්ත්වය / විස්තරය</th>
+          <th class="border border-slate-400 p-2 text-right">ලකුණු</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="border border-slate-400 p-2 font-semibold">ක්‍රියාකාරකම් (3)</td>
+          <td class="border border-slate-400 p-2">
+            සම්පූර්ණ කළ ඒවා: <span id="pdf-act-done">0/3</span> • සම්පූර්ණ නොකළ ඒවා: <span id="pdf-act-undone">3</span>
+          </td>
+          <td class="border border-slate-400 p-2 text-right font-bold" id="pdf-act-marks">0 / 30</td>
+        </tr>
+        <tr>
+          <td class="border border-slate-400 p-2 font-semibold">සමමිති ක්‍රීඩාව (වට 8)</td>
+          <td class="border border-slate-400 p-2" id="pdf-game-status">සම්පූර්ණ කර නැත</td>
+          <td class="border border-slate-400 p-2 text-right font-bold" id="pdf-game-marks">0 / 80</td>
+        </tr>
+        <tr>
+          <td class="border border-slate-400 p-2 font-semibold">ප්‍රශ්නාවලිය (ප්‍රශ්න 15)</td>
+          <td class="border border-slate-400 p-2" id="pdf-quiz-status">සම්පූර්ණ කර නැත • නිවැරදි: 0, වැරදි: 0</td>
+          <td class="border border-slate-400 p-2 text-right font-bold" id="pdf-quiz-marks">0 / 30</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Teacher Observation Section -->
+    <div class="border border-slate-500 rounded p-4 print-break-avoid">
+      <h2 class="text-base font-extrabold text-slate-900 mb-2">ගුරුභවතාගේ නිරීක්ෂණය</h2>
+      <div class="h-36 border-b border-dashed border-slate-400 mb-2"></div>
+      <div class="flex justify-between text-xs text-slate-600 pt-2">
+        <span>ගුරුභවතාගේ අත්සන: ______________________</span>
+        <span>දිනය: ______________________</span>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    /**
+     * DP Maths Interactive Lesson Production Engine (LPE 2.0)
+     * Grade 7 - Lesson 1: සමමිතිය (Symmetry)
+     */
+
+    const state = {
+      studentName: '',
+      institute: '',
+      customInstitute: '',
+      displayInstitute: '',
+      activeTab: 'lesson',
+      viewedTabs: new Set(['lesson']),
+      // Activity scores (max 10 each = 30)
+      act1Done: false,
+      act1Score: 0,
+      act2Done: false,
+      act2Score: 0,
+      act3Done: false,
+      act3Score: 0,
+      // Mirror grid state: 6x6 grid (row 0..5, col 0..5). Right side target cells: col 3..5.
+      // Let's make a clear symmetric pattern on right side (cols 3,4):
+      // Row 1: col 3, col 4 -> mirror left: col 1, col 2
+      // Row 2: col 3 -> mirror left: col 2
+      // Row 3: col 3, col 4 -> mirror left: col 1, col 2
+      // Row 4: col 3 -> mirror left: col 2
+      rightPattern: new Set(['1-3', '1-4', '2-3', '3-3', '3-4', '4-3']),
+      leftSelected: new Set(),
+      // Mini-game (8 rounds, 10 marks each = 80)
+      gameStarted: false,
+      gameCompleted: false,
+      gameRoundIndex: 0,
+      gameScore: 0,
+      gameStreak: 0,
+      gameAnsweredCurrent: false,
+      // Quiz (15 questions, 2 marks each = 30)
+      quizIndex: 0,
+      quizAnswers: {}, // qIndex -> { submitted: bool, correct: bool, userVal: any }
+    };
+
+    // ==================== 1. ONBOARDING & INSTITUTE SELECTION ====================
+    const onboardingForm = document.getElementById('onboarding-form');
+    const instituteSelect = document.getElementById('student-institute');
+    const customInstituteWrapper = document.getElementById('custom-institute-wrapper');
+    const customInstituteInput = document.getElementById('custom-institute-input');
+    const onboardingError = document.getElementById('onboarding-error');
+
+    instituteSelect.addEventListener('change', () => {
+      if (instituteSelect.value === 'වෙනත්') {
+        customInstituteWrapper.classList.remove('hidden');
+        customInstituteInput.setAttribute('required', 'required');
+      } else {
+        customInstituteWrapper.classList.add('hidden');
+        customInstituteInput.removeAttribute('required');
+        customInstituteInput.value = '';
+      }
+      onboardingError.classList.add('hidden');
+    });
+
+    onboardingForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nameVal = document.getElementById('student-name').value.trim();
+      const instVal = instituteSelect.value;
+      const customVal = customInstituteInput.value.trim();
+
+      if (!nameVal) {
+        showOnboardingError('කරුණාකර ඔබගේ සම්පූර්ණ නම ඇතුළත් කරන්න.');
+        return;
+      }
+      if (!instVal) {
+        showOnboardingError('කරුණාකර ඔබගේ අධ්‍යාපන ආයතනය තෝරන්න.');
+        return;
+      }
+      if (instVal === 'වෙනත්' && !customVal) {
+        showOnboardingError('"වෙනත්" තෝරා ඇති බැවින් කරුණාකර ඔබගේ ආයතනයේ නම ඇතුළත් කරන්න.');
+        return;
+      }
+
+      state.studentName = nameVal;
+      state.institute = instVal;
+      state.customInstitute = instVal === 'වෙනත්' ? customVal : '';
+      state.displayInstitute = instVal === 'වෙනත්' ? customVal : instVal;
+
+      document.getElementById('header-student-name').textContent = state.studentName;
+      document.getElementById('header-student-institute').textContent = state.displayInstitute;
+
+      document.getElementById('onboarding-screen').classList.add('hidden');
+      document.getElementById('app-shell').classList.remove('hidden');
+
+      updateProgressAndSummary();
+    });
+
+    function showOnboardingError(msg) {
+      onboardingError.textContent = msg;
+      onboardingError.classList.remove('hidden');
+    }
+
+    // ==================== 2. NAVIGATION TABS ====================
+    function switchTab(tabName) {
+      state.activeTab = tabName;
+      state.viewedTabs.add(tabName);
+
+      document.querySelectorAll('.nav-tab').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+      });
+
+      document.querySelectorAll('.tab-content').forEach((sec) => {
+        sec.classList.toggle('hidden', sec.id !== `tab-${tabName}`);
+      });
+
+      updateProgressAndSummary();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.querySelectorAll('.nav-tab').forEach((btn) => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    // ==================== 3. LESSON INTERACTIVE FOLD DEMO ====================
+    let isFolded = false;
+    const btnToggleFold = document.getElementById('btn-toggle-fold');
+    const foldLeftHalf = document.getElementById('fold-left-half');
+    const foldStatusText = document.getElementById('fold-status-text');
+
+    btnToggleFold.addEventListener('click', () => {
+      isFolded = !isFolded;
+      if (isFolded) {
+        // Flip left half over vertical axis at x=160 (scaleX(-1) around 160)
+        foldLeftHalf.style.transform = 'translateX(320px) scaleX(-1)';
+        btnToggleFold.textContent = 'දිග හැර බලන්න';
+        foldStatusText.textContent = 'නිවැරදියි! කඩ ඉර ඔස්සේ නැමූ විට කොටස් දෙක එකිනෙක සම්පාත වේ.';
+      } else {
+        foldLeftHalf.style.transform = 'none';
+        btnToggleFold.textContent = 'දෙකට නමා බලන්න';
+        foldStatusText.textContent = 'දැනට රූපය දිග හැර ඇත — දෙපස කොටස් සමාන වේ.';
+      }
+    });
+
+    // ==================== 4. GUIDED INTERACTIVE ACTIVITIES (3) ====================
+    // Activity 1: A and C are bilaterally symmetric
+    const act1Selected = new Set();
+    document.querySelectorAll('.act1-item').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (state.act1Done) return;
+        const shape = btn.dataset.shape;
+        if (act1Selected.has(shape)) {
+          act1Selected.delete(shape);
+          btn.classList.remove('border-blue-600', 'bg-blue-50');
+          btn.classList.add('border-slate-200', 'bg-slate-50');
+        } else {
+          act1Selected.add(shape);
+          btn.classList.add('border-blue-600', 'bg-blue-50');
+          btn.classList.remove('border-slate-200', 'bg-slate-50');
+        }
+      });
+    });
+
+    document.getElementById('btn-check-act1').addEventListener('click', () => {
+      const fb = document.getElementById('act1-feedback');
+      if (act1Selected.size === 0) {
+        fb.className = 'text-sm font-bold text-amber-700';
+        fb.textContent = 'කරුණාකර අවම වශයෙන් එක් රූපයක්වත් තෝරන්න.';
+        return;
+      }
+      const isExact = act1Selected.size === 2 && act1Selected.has('A') && act1Selected.has('C');
+      state.act1Done = true;
+      document.getElementById('act1-status').textContent = 'සම්පූර්ණයි';
+      document.getElementById('act1-status').className = 'text-xs font-extrabold text-emerald-700';
+
+      if (isExact) {
+        state.act1Score = 10;
+        fb.className = 'text-sm font-bold text-emerald-700';
+        fb.textContent = 'නිවැරදියි! විශිෂ්ටයි! (අ) සමද්විපාද ත්‍රිකෝණය සහ (ඇ) පත්‍ර හැඩය ද්විපාර්ශ්වික සමමිතික රූප වේ. (+10)';
+      } else {
+        state.act1Score = 0;
+        fb.className = 'text-sm font-bold text-rose-700';
+        fb.textContent = 'හොඳ උත්සාහයක්! නිවැරදි ද්විපාර්ශ්වික සමමිතික රූප වන්නේ (අ) සහ (ඇ) පමණි.';
+      }
+      updateProgressAndSummary();
+    });
+
+    // Activity 2: Distance from symmetry axis to P' is 4 squares
+    document.getElementById('btn-check-act2').addEventListener('click', () => {
+      const val = Number(document.getElementById('act2-input').value);
+      const fb = document.getElementById('act2-feedback');
+      if (document.getElementById('act2-input').value === '') {
+        fb.className = 'text-sm font-bold text-amber-700';
+        fb.textContent = 'කරුණාකර කොටු ගණන ඇතුළත් කරන්න.';
+        return;
+      }
+      state.act2Done = true;
+      document.getElementById('act2-status').textContent = 'සම්පූර්ණයි';
+      document.getElementById('act2-status').className = 'text-xs font-extrabold text-emerald-700';
+
+      if (val === 4) {
+        state.act2Score = 10;
+        fb.className = 'text-sm font-bold text-emerald-700';
+        fb.textContent = 'නිවැරදියි! විශිෂ්ටයි! අනුරූප ශීර්ෂය සමමිති අක්ෂයේ සිට සමාන දුරකින් (කොටු 4කින්) පිහිටයි. (+10)';
+      } else {
+        state.act2Score = 0;
+        fb.className = 'text-sm font-bold text-rose-700';
+        fb.textContent = 'පියවරක් නැවත සලකා බලන්න. P සිට අක්ෂයට දුර කොටු 4ක් නම්, P\' ද කොටු 4ක දුරින් තිබිය යුතුය.';
+      }
+      updateProgressAndSummary();
+    });
+
+    // Activity 3: Mirror Grid Completion
+    const mirrorGridContainer = document.getElementById('mirror-grid-container');
+
+    function renderMirrorGrid() {
+      mirrorGridContainer.innerHTML = '';
+      for (let r = 0; r < 6; r++) {
+        for (let c = 0; c < 6; c++) {
+          const key = `${r}-${c}`;
+          const cell = document.createElement('button');
+          cell.type = 'button';
+          cell.className = 'w-9 h-9 sm:w-10 sm:h-10 rounded-lg border text-xs font-bold flex items-center justify-center transition cursor-pointer';
+
+          // Vertical axis line on right border of col 2
+          if (c === 2) {
+            cell.style.borderRight = '3px dashed #e11d48';
+          }
+
+          if (c >= 3) {
+            // Right side (given pattern)
+            if (state.rightPattern.has(key)) {
+              cell.className += ' bg-blue-600 border-blue-700 text-white cursor-default';
+              cell.textContent = '●';
+            } else {
+              cell.className += ' bg-white border-slate-300 text-slate-300 cursor-default';
+            }
+          } else {
+            // Left side (interactive)
+            const isPicked = state.leftSelected.has(key);
+            if (isPicked) {
+              cell.className += ' bg-cyan-500 border-cyan-700 text-white';
+              cell.textContent = '✓';
+            } else {
+              cell.className += ' bg-white hover:bg-cyan-50 border-slate-300 text-slate-500';
+            }
+            cell.addEventListener('click', () => {
+              if (state.act3Done) return;
+              if (state.leftSelected.has(key)) {
+                state.leftSelected.delete(key);
+              } else {
+                state.leftSelected.add(key);
+              }
+              renderMirrorGrid();
+            });
+          }
+          mirrorGridContainer.appendChild(cell);
+        }
+      }
+    }
+
+    // Expected left mirror keys for rightPattern:
+    // col 3 (1 unit right of axis) -> col 2 (1 unit left of axis)
+    // col 4 (2 units right of axis) -> col 1 (2 units left of axis)
+    const expectedLeftKeys = new Set(['1-2', '1-1', '2-2', '3-2', '3-1', '4-2']);
+
+    document.getElementById('btn-check-act3').addEventListener('click', () => {
+      const fb = document.getElementById('act3-feedback');
+      const matches =
+        state.leftSelected.size === expectedLeftKeys.size &&
+        [...expectedLeftKeys].every((k) => state.leftSelected.has(k));
+
+      state.act3Done = true;
+      document.getElementById('act3-status').textContent = 'සම්පූර්ණයි';
+      document.getElementById('act3-status').className = 'text-xs font-extrabold text-emerald-700';
+
+      if (matches) {
+        state.act3Score = 10;
+        fb.className = 'text-sm font-bold text-emerald-700';
+        fb.textContent = 'නිවැරදියි! ඔබට මේ සංකල්පය දැන් හොඳින් තේරෙනවා! සමමිතික රූපය නිවැරදිව සම්පූර්ණ කළා. (+10)';
+      } else {
+        state.act3Score = 0;
+        fb.className = 'text-sm font-bold text-rose-700';
+        fb.textContent = 'හොඳ උත්සාහයක්! සමමිති අක්ෂයේ සිට සමාන කොටු දුරකින් වම් පස කොටු තෝරා ගත යුතුය.';
+      }
+      updateProgressAndSummary();
+    });
+
+    document.getElementById('btn-reset-act3').addEventListener('click', () => {
+      state.act3Done = false;
+      state.act3Score = 0;
+      state.leftSelected.clear();
+      document.getElementById('act3-status').textContent = 'සම්පූර්ණ කර නැත';
+      document.getElementById('act3-status').className = 'text-xs font-bold text-slate-500';
+      document.getElementById('act3-feedback').textContent = '';
+      renderMirrorGrid();
+      updateProgressAndSummary();
+    });
+
+    renderMirrorGrid();
+
+    // ==================== 5. EDUCATIONAL MINI-GAME (8 ROUNDS) ====================
+    const gameRounds = [
+      {
+        q: '1 වටය: සමද්විපාද ත්‍රිකෝණයක ඇති සමමිති අක්ෂ ගණන කීයද?',
+        opts: ['1', '2', '3', '0'],
+        ans: '1',
+      },
+      {
+        q: '2 වටය: සමචතුරස්‍රයක ඇති සමමිති අක්ෂ ගණන කීයද?',
+        opts: ['2', '3', '4', '8'],
+        ans: '4',
+      },
+      {
+        q: '3 වටය: කොටු දැලක A ශීර්ෂය සමමිති අක්ෂයේ සිට කොටු 5ක් දකුණින් ඇත. A\' අක්ෂයේ සිට වමට කොටු කීයකින් තිබේද?',
+        opts: ['කොටු 3', 'කොටු 5', 'කොටු 10', 'කොටු 2'],
+        ans: 'කොටු 5',
+      },
+      {
+        q: '4 වටය: තල රූපයක් රේඛාවක් ඔස්සේ නැමූ විට කොටස් දෙක සම්පාත නොවන්නේ නම්, එම රේඛාව:',
+        opts: ['සමමිති අක්ෂයකි', 'සමමිති අක්ෂයක් නොවේ', 'කර්ණයකි', 'පරිධියකි'],
+        ans: 'සමමිති අක්ෂයක් නොවේ',
+      },
+      {
+        q: '5 වටය: කඩදාසියක් දෙවරක් ඍජු මුල්ලක් ලැබෙන සේ නමා කපා දිග හැරිය විට සාමාන්‍යයෙන් ලැබෙන සමමිති අක්ෂ ගණන:',
+        opts: ['1', '2', '0', '6'],
+        ans: '2',
+      },
+      {
+        q: '6 වටය: සමමිති අක්ෂයක දෙපස ඇති කොටස් දෙක හැඩයෙන් හා වර්ගඵලයෙන්:',
+        opts: ['වෙනස් වේ', 'සමාන වේ', 'දෙගුණ වේ', 'සම්බන්ධ නැත'],
+        ans: 'සමාන වේ',
+      },
+      {
+        q: '7 වටය: වෘත්තාකාර ආස්තරයක සමමිති අක්ෂ ගණන, සමචතුරස්‍රයක සමමිති අක්ෂ ගණනට වඩා:',
+        opts: ['වැඩි ය', 'අඩු ය', 'සමාන ය', 'බිංදුවකි'],
+        ans: 'වැඩි ය',
+      },
+      {
+        q: '8 වටය: C ශීර්ෂය සමමිති අක්ෂයේ සිට කොටු 6ක් දකුණින් ඇත. C\' ශීර්ෂය අක්ෂයේ සිට වමට ඇති දුර:',
+        opts: ['කොටු 4', 'කොටු 6', 'කොටු 12', 'කොටු 3'],
+        ans: 'කොටු 6',
+      },
+    ];
+
+    document.getElementById('btn-start-game').addEventListener('click', startGame);
+    document.getElementById('btn-replay-game').addEventListener('click', startGame);
+
+    function startGame() {
+      state.gameStarted = true;
+      state.gameCompleted = false;
+      state.gameRoundIndex = 0;
+      state.gameScore = 0;
+      state.gameStreak = 0;
+      state.gameAnsweredCurrent = false;
+
+      document.getElementById('game-start-panel').classList.add('hidden');
+      document.getElementById('game-summary-panel').classList.add('hidden');
+      document.getElementById('game-play-panel').classList.remove('hidden');
+
+      renderGameRound();
+      updateProgressAndSummary();
+    }
+
+    function renderGameRound() {
+      const round = gameRounds[state.gameRoundIndex];
+      state.gameAnsweredCurrent = false;
+
+      document.getElementById('game-round-display').textContent = `${state.gameRoundIndex + 1} / ${gameRounds.length}`;
+      document.getElementById('game-score-display').textContent = `${state.gameScore}`;
+      document.getElementById('game-q-label').textContent = `වටය ${state.gameRoundIndex + 1} / ${gameRounds.length}`;
+      document.getElementById('game-streak-label').textContent = `නිවැරදි අනුක්‍රමය: ${state.gameStreak}`;
+      document.getElementById('game-question-text').textContent = round.q;
+      document.getElementById('game-feedback').textContent = '';
+      document.getElementById('btn-next-game-round').classList.add('hidden');
+
+      const box = document.getElementById('game-options-box');
+      box.innerHTML = '';
+
+      round.opts.forEach((opt) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'p-3.5 rounded-2xl border-2 border-slate-200 hover:border-blue-500 bg-slate-50 text-slate-900 font-bold text-sm text-left transition cursor-pointer';
+        btn.textContent = opt;
+        btn.addEventListener('click', () => handleGameAnswer(opt, btn));
+        box.appendChild(btn);
+      });
+    }
+
+    function handleGameAnswer(chosen, clickedBtn) {
+      if (state.gameAnsweredCurrent) return;
+      state.gameAnsweredCurrent = true;
+
+      const round = gameRounds[state.gameRoundIndex];
+      const fb = document.getElementById('game-feedback');
+
+      document.querySelectorAll('#game-options-box button').forEach((b) => {
+        b.disabled = true;
+        if (b.textContent === round.ans) {
+          b.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900');
+        }
+      });
+
+      if (chosen === round.ans) {
+        state.gameScore += 10;
+        state.gameStreak += 1;
+        clickedBtn.classList.add('border-emerald-600', 'bg-emerald-100');
+        fb.className = 'text-sm font-bold text-emerald-700';
+        fb.textContent = 'නිවැරදියි! විශිෂ්ටයි! (+10 ලකුණු)';
+      } else {
+        state.gameStreak = 0;
+        clickedBtn.classList.add('border-rose-500', 'bg-rose-50');
+        fb.className = 'text-sm font-bold text-rose-700';
+        fb.textContent = `හොඳ උත්සාහයක්! නිවැරදි පිළිතුර: ${round.ans}`;
+      }
+
+      document.getElementById('game-score-display').textContent = `${state.gameScore}`;
+      document.getElementById('game-streak-label').textContent = `නිවැරදි අනුක්‍රමය: ${state.gameStreak}`;
+      document.getElementById('btn-next-game-round').classList.remove('hidden');
+      updateProgressAndSummary();
+    }
+
+    document.getElementById('btn-next-game-round').addEventListener('click', () => {
+      if (state.gameRoundIndex + 1 < gameRounds.length) {
+        state.gameRoundIndex += 1;
+        renderGameRound();
+      } else {
+        state.gameCompleted = true;
+        document.getElementById('game-play-panel').classList.add('hidden');
+        document.getElementById('game-summary-panel').classList.remove('hidden');
+        document.getElementById('game-final-score-text').textContent = `ලබාගත් ලකුණු: ${state.gameScore} / 80`;
+        document.getElementById('game-final-msg').textContent =
+          'විශිෂ්ටයි! ඔබ සමමිති අභියෝගය සාර්ථකව සම්පූර්ණ කළා.';
+        updateProgressAndSummary();
+      }
+    });
+
+    // ==================== 6. LESSON QUIZ (15 QUESTIONS) ====================
+    const quizQuestions = [
+      {
+        type: 'mcq',
+        label: 'බහුවරණ ප්‍රශ්නය',
+        q: '1. තල රූපයක් සරල රේඛාවක් ඔස්සේ නැමීමෙන් එකිනෙක සම්පාත වන කොටස් දෙකකට බෙදේ නම් එය කුමන රූපයක්ද?',
+        opts: ['ද්විපාර්ශ්වික සමමිතික තල රූපයක්', 'සමාන්තරාස්‍රයක්', 'විෂමබාහු රූපයක්', 'ත්‍රිමාන ඝනයක්'],
+        ans: 'ද්විපාර්ශ්වික සමමිතික තල රූපයක්',
+      },
+      {
+        type: 'mcq',
+        label: 'බහුවරණ ප්‍රශ්නය',
+        q: '2. ද්විපාර්ශ්වික සමමිතික රූපයක නැමුම් රේඛාව හඳුන්වන්නේ කුමන නමකින්ද?',
+        opts: ['පරිමිතිය', 'සමමිති අක්ෂය', 'විකර්ණය', 'ආරම්භක ලක්ෂ්‍යය'],
+        ans: 'සමමිති අක්ෂය',
+      },
+      {
+        type: 'num',
+        label: 'සංඛ්‍යාත්මක ප්‍රශ්නය',
+        q: '3. සමද්විපාද ත්‍රිකෝණයක ඇති සමමිති අක්ෂ ගණන කීයද?',
+        ans: 1,
+      },
+      {
+        type: 'num',
+        label: 'සංඛ්‍යාත්මක ප්‍රශ්නය',
+        q: '4. සමචතුරස්‍රයක ඇති සමමිති අක්ෂ ගණන කීයද?',
+        ans: 4,
+      },
+      {
+        type: 'mcq',
+        label: 'සංකල්පීය ප්‍රශ්නය',
+        q: '5. රූපයක් රේඛාවකින් හැඩයෙන් හා වර්ගඵලයෙන් සමාන කොටස් දෙකකට බෙදුණත්, නැමූ විට සම්පාත නොවේ නම් එම රේඛාව:',
+        opts: ['සමමිති අක්ෂයකි', 'සමමිති අක්ෂයක් නොවේ', 'ප්‍රධාන අක්ෂයකි', 'විකර්ණයකි'],
+        ans: 'සමමිති අක්ෂයක් නොවේ',
+      },
+      {
+        type: 'mcq',
+        label: 'සංකල්පීය ප්‍රශ්නය',
+        q: '6. ද්විපාර්ශ්වික සමමිතික රූපයක සමමිති අක්ෂයට දෙපස ඇති කොටස් දෙක:',
+        opts: ['හැඩයෙන් සමාන වුවත් වර්ගඵලයෙන් අසමාන වේ', 'හැඩයෙන් හා වර්ගඵලයෙන් එක සමාන වේ', 'සැමවිටම අසමාන වේ', 'වර්ගඵලයෙන් පමණක් සමාන වේ'],
+        ans: 'හැඩයෙන් හා වර්ගඵලයෙන් එක සමාන වේ',
+      },
+      {
+        type: 'num',
+        label: 'ගැටලු විසඳීම',
+        q: '7. සිරස් සමමිති අක්ෂයේ සිට B ශීර්ෂයට ඇති දුර කොටු 3කි. එහි අනුරූප ශීර්ෂය වන B\', සමමිති අක්ෂයේ සිට කොටු කීයක දුරින් පිහිටයිද?',
+        ans: 3,
+      },
+      {
+        type: 'num',
+        label: 'ගැටලු විසඳීම',
+        q: '8. සමමිති අක්ෂයේ සිට C ශීර්ෂයට දුර කොටු 6ක් නම්, C\' ශීර්ෂය අක්ෂයේ සිට කොටු කීයක දුරින් පිහිටිය යුතුද?',
+        ans: 6,
+      },
+      {
+        type: 'mcq',
+        label: 'බහුවරණ ප්‍රශ්නය',
+        q: '9. කොටු දැලක සමමිති අක්ෂයෙන් දකුණු පස ඇති D ශීර්ෂයට අනුරූප වම් පස ශීර්ෂය ලියන්නේ කෙසේද?',
+        opts: ['d', 'D\'', 'D2', '-D'],
+        ans: 'D\'',
+      },
+      {
+        type: 'mcq',
+        label: 'සංකල්පීය ප්‍රශ්නය',
+        q: '10. ද්විපාර්ශ්වික සමමිතික රූපයකට තිබිය හැකි උපරිම සමමිති අක්ෂ ගණන එකක් පමණක්ද?',
+        opts: ['ඔව්, සැමවිටම එකකි', 'නැත, එකකට වැඩියෙන් තිබිය හැක', 'සැමවිටම බිංදුවකි', 'සැමවිටම දෙකකි'],
+        ans: 'නැත, එකකට වැඩියෙන් තිබිය හැක',
+      },
+      {
+        type: 'mcq',
+        label: 'ප්‍රායෝගික අවබෝධය',
+        q: '11. කඩදාසියක් දෙකට නමා, නැමුම් දාරය ඇතුළත් වන සේ හැඩයක් කපා දිග හැරිය විට ලැබෙන්නේ:',
+        opts: ['සමමිතික රූපයක් නොවේ', 'ද්විපාර්ශ්වික සමමිතික රූපයකි', 'ත්‍රිකෝණයක් පමණි', 'සෘජුකෝණාස්‍රයක් පමණි'],
+        ans: 'ද්විපාර්ශ්වික සමමිතික රූපයකි',
+      },
+      {
+        type: 'mcq',
+        label: 'සංකල්පීය ප්‍රශ්නය',
+        q: '12. සමමිති අක්ෂ 2ක් ඇති සමමිතික රූපයක් එක් සමමිති අක්ෂයක් ඔස්සේ කපා කොටස් දෙකකට වෙන් කළ විට ලැබෙන එක් එක් කොටස:',
+        opts: ['සමමිතික වේ', 'අසමමිතික වේ', 'වෘත්තාකාර වේ', 'රේඛාවක් වේ'],
+        ans: 'සමමිතික වේ',
+      },
+      {
+        type: 'num',
+        label: 'ගැටලු විසඳීම',
+        q: '13. නිදසුන 1 අනුව D ශීර්ෂය සමමිති අක්ෂයේ සිට කොටු 3ක දුරින් ඇත. D\' ශීර්ෂය අක්ෂයේ සිට ඇති දුර (කොටු ගණන) කීයද?',
+        ans: 3,
+      },
+      {
+        type: 'mcq',
+        label: 'සංකල්පීය ප්‍රශ්නය',
+        q: '14. වෘත්තාකාර ආස්තරයක සමමිති අක්ෂ ගණන, සමචතුරස්‍රයක සමමිති අක්ෂ ගණනට සාපේක්ෂව:',
+        opts: ['වැඩි ය', 'අඩු ය', 'සමාන ය', 'නොපවතී'],
+        ans: 'වැඩි ය',
+      },
+      {
+        type: 'mcq',
+        label: 'සාරාංශ ප්‍රශ්නය',
+        q: '15. කොටු දැලක සමමිතික රූපයක් අඳින විට අනුරූප ශීර්ෂ ලකුණු කරන්නේ කුමන පදනම මතද?',
+        opts: ['සමමිති අක්ෂයේ සිට සමාන දුරකින්', 'කැමති දුරකින්', 'කොටු 1ක දුරකින් පමණක්', 'පහළ දාරයේ සිට'],
+        ans: 'සමමිති අක්ෂයේ සිට සමාන දුරකින්',
+      },
+    ];
+
+    function renderQuizQuestion() {
+      const idx = state.quizIndex;
+      const qObj = quizQuestions[idx];
+      const saved = state.quizAnswers[idx];
+
+      document.getElementById('quiz-progress-label').textContent = `${idx + 1} / ${quizQuestions.length}`;
+      document.getElementById('quiz-q-type').textContent = qObj.label;
+      document.getElementById('quiz-question-text').textContent = qObj.q;
+      document.getElementById('quiz-feedback').textContent = '';
+
+      const mcqBox = document.getElementById('quiz-mcq-container');
+      const numBox = document.getElementById('quiz-num-container');
+      const numInput = document.getElementById('quiz-num-input');
+
+      if (qObj.type === 'mcq') {
+        mcqBox.classList.remove('hidden');
+        numBox.classList.add('hidden');
+        mcqBox.innerHTML = '';
+
+        qObj.opts.forEach((opt) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.dataset.opt = opt;
+          btn.className = 'quiz-opt-btn w-full p-3.5 rounded-2xl border-2 border-slate-200 hover:border-blue-500 bg-slate-50 text-slate-900 font-semibold text-sm text-left transition cursor-pointer';
+          btn.textContent = opt;
+
+          if (saved && saved.userVal === opt) {
+            btn.classList.add('border-blue-600', 'bg-blue-50', 'font-bold');
+          }
+          if (saved && saved.submitted) {
+            btn.disabled = true;
+            if (opt === qObj.ans) {
+              btn.classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-900');
+            } else if (opt === saved.userVal && !saved.correct) {
+              btn.classList.add('border-rose-600', 'bg-rose-50', 'text-rose-900');
+            }
+          }
+
+          btn.addEventListener('click', () => {
+            if (saved && saved.submitted) return;
+            document.querySelectorAll('.quiz-opt-btn').forEach((b) => {
+              b.classList.remove('border-blue-600', 'bg-blue-50', 'font-bold');
+            });
+            btn.classList.add('border-blue-600', 'bg-blue-50', 'font-bold');
+            state.quizAnswers[idx] = { submitted: false, correct: false, userVal: opt };
+          });
+
+          mcqBox.appendChild(btn);
+        });
+      } else {
+        mcqBox.classList.add('hidden');
+        numBox.classList.remove('hidden');
+        numInput.disabled = Boolean(saved && saved.submitted);
+        numInput.value = saved && saved.userVal !== undefined ? saved.userVal : '';
+      }
+
+      if (saved && saved.submitted) {
+        const fb = document.getElementById('quiz-feedback');
+        if (saved.correct) {
+          fb.className = 'text-sm font-bold text-emerald-700';
+          fb.textContent = 'නිවැරදියි! (+2 ලකුණු)';
+        } else {
+          fb.className = 'text-sm font-bold text-rose-700';
+          fb.textContent = `වැරදියි. නිවැරදි පිළිතුර: ${qObj.ans}`;
+        }
+      }
+
+      updateQuizLiveScore();
+    }
+
+    document.getElementById('btn-submit-quiz-q').addEventListener('click', () => {
+      const idx = state.quizIndex;
+      const qObj = quizQuestions[idx];
+      const existing = state.quizAnswers[idx];
+      const fb = document.getElementById('quiz-feedback');
+
+      if (existing && existing.submitted) {
+        fb.className = 'text-sm font-bold text-slate-600';
+        fb.textContent = 'මෙම ප්‍රශ්නයට දැනටමත් පිළිතුරු ලබා දී ඇත.';
+        return;
+      }
+
+      let userVal = null;
+      let isCorrect = false;
+
+      if (qObj.type === 'mcq') {
+        if (!existing || !existing.userVal) {
+          fb.className = 'text-sm font-bold text-amber-700';
+          fb.textContent = 'කරුණාකර පිළිතුරක් තෝරන්න.';
+          return;
+        }
+        userVal = existing.userVal;
+        isCorrect = userVal === qObj.ans;
+      } else {
+        const raw = document.getElementById('quiz-num-input').value.trim();
+        if (raw === '') {
+          fb.className = 'text-sm font-bold text-amber-700';
+          fb.textContent = 'කරුණාකර සංඛ්‍යාත්මක පිළිතුර ඇතුළත් කරන්න.';
+          return;
+        }
+        userVal = Number(raw);
+        isCorrect = userVal === qObj.ans;
+      }
+
+      state.quizAnswers[idx] = { submitted: true, correct: isCorrect, userVal };
+      renderQuizQuestion();
+      updateProgressAndSummary();
+    });
+
+    document.getElementById('btn-prev-quiz').addEventListener('click', () => {
+      if (state.quizIndex > 0) {
+        state.quizIndex -= 1;
+        renderQuizQuestion();
+      }
+    });
+
+    document.getElementById('btn-next-quiz').addEventListener('click', () => {
+      if (state.quizIndex + 1 < quizQuestions.length) {
+        state.quizIndex += 1;
+        renderQuizQuestion();
+      }
+    });
+
+    function getQuizStats() {
+      let submittedCount = 0;
+      let correctCount = 0;
+      let wrongCount = 0;
+      for (let i = 0; i < quizQuestions.length; i++) {
+        const a = state.quizAnswers[i];
+        if (a && a.submitted) {
+          submittedCount++;
+          if (a.correct) correctCount++;
+          else wrongCount++;
+        }
+      }
+      return {
+        submittedCount,
+        correctCount,
+        wrongCount,
+        marks: correctCount * 2,
+        maxMarks: quizQuestions.length * 2,
+        completed: submittedCount === quizQuestions.length,
+      };
+    }
+
+    function updateQuizLiveScore() {
+      const qs = getQuizStats();
+      document.getElementById('quiz-score-live').textContent = `ලකුණු: ${qs.marks} / ${qs.maxMarks}`;
+      const sumBox = document.getElementById('quiz-summary-box');
+      if (qs.completed) {
+        sumBox.classList.remove('hidden');
+        document.getElementById('quiz-final-summary-text').textContent =
+          `ඔබ ප්‍රශ්න 15න් ${qs.correctCount}කට නිවැරදි පිළිතුරු ලබා දී ඇත. ලබාගත් ලකුණු: ${qs.marks} / ${qs.maxMarks}.`;
+      } else {
+        sumBox.classList.add('hidden');
+      }
+    }
+
+    renderQuizQuestion();
+
+    // ==================== 7. PROGRESS TRACKING, SUMMARY & PDF EXPORT ====================
+    function updateProgressAndSummary() {
+      const actDoneCount = [state.act1Done, state.act2Done, state.act3Done].filter(Boolean).length;
+      const actUndoneCount = 3 - actDoneCount;
+      const actMarks = state.act1Score + state.act2Score + state.act3Score;
+
+      const gameMarks = state.gameScore;
+      const qs = getQuizStats();
+
+      const totalObtained = actMarks + gameMarks + qs.marks;
+      const totalMax = 30 + 80 + qs.maxMarks; // 140
+      const totalPct = totalMax > 0 ? Math.round((totalObtained / totalMax) * 100) : 0;
+
+      // Overall completion out of 5 milestones:
+      // 1) Viewed lesson/tabs (weighted by visited tabs out of 5 -> up to 20%)
+      // 2) Activities completed (actDoneCount / 3 -> up to 30%)
+      // 3) Game completed (25%)
+      // 4) Quiz completed (25%)
+      const tabPct = (state.viewedTabs.size / 5) * 20;
+      const actCompPct = (actDoneCount / 3) * 30;
+      const gameCompPct = state.gameCompleted ? 25 : 0;
+      const quizCompPct = qs.completed ? 25 : 0;
+      const overallPct = Math.round(tabPct + actCompPct + gameCompPct + quizCompPct);
+
+      // Update header & top bar
+      document.getElementById('header-progress-pct').textContent = `${overallPct}%`;
+      document.getElementById('top-progress-bar').style.width = `${overallPct}%`;
+      document.getElementById('top-score-badge').textContent = `ලකුණු: ${totalObtained} / ${totalMax}`;
+
+      // Update Progress Tab Summary
+      const todayStr = new Date().toLocaleDateString('si-LK');
+      document.getElementById('sum-name').textContent = state.studentName || '-';
+      document.getElementById('sum-institute').textContent = state.displayInstitute || '-';
+      document.getElementById('sum-date').textContent = todayStr;
+      document.getElementById('sum-act-done').textContent = `${actDoneCount} / 3`;
+      document.getElementById('sum-act-undone').textContent = `${actUndoneCount}`;
+      document.getElementById('sum-game-done').textContent = state.gameCompleted ? 'ඔව්' : 'නැත';
+      document.getElementById('sum-quiz-done').textContent = qs.completed ? 'ඔව්' : 'නැත';
+      document.getElementById('sum-overall-pct').textContent = `${overallPct}%`;
+
+      document.getElementById('sum-act-marks').textContent = `${actMarks} / 30`;
+      document.getElementById('sum-game-marks').textContent = `${gameMarks} / 80`;
+      document.getElementById('sum-quiz-marks').textContent = `${qs.marks} / ${qs.maxMarks}`;
+      document.getElementById('sum-quiz-counts').textContent = `${qs.correctCount} නිවැරදි, ${qs.wrongCount} වැරදි`;
+      document.getElementById('sum-total-marks').textContent = `${totalObtained} / ${totalMax}`;
+      document.getElementById('sum-total-pct').textContent = `${totalPct}%`;
+
+      const msgEl = document.getElementById('sum-result-message');
+      if (totalPct >= 75) {
+        msgEl.textContent = 'විශිෂ්ටයි! ඔබ පාඩම ඉතා හොඳින් අවබෝධ කරගෙන තිබෙනවා.';
+      } else if (totalPct >= 40) {
+        msgEl.textContent = 'හොඳයි! තවත් පුහුණුවකින් ඔබට මේ පාඩම වඩාත් හොඳින් තේරුම් ගන්න පුළුවන්.';
+      } else {
+        msgEl.textContent = 'ඔබගේ උත්සාහය අගය කරනවා. නැවත ක්‍රියාකාරකම් කරලා ඔබගේ දැනුම වර්ධනය කරගන්න.';
+      }
+
+      // Sync PDF Report View
+      document.getElementById('pdf-date').textContent = todayStr;
+      document.getElementById('pdf-name').textContent = state.studentName || '-';
+      document.getElementById('pdf-institute').textContent = state.displayInstitute || '-';
+      document.getElementById('pdf-overall-pct').textContent = `${overallPct}%`;
+      document.getElementById('pdf-total-marks').textContent = `${totalObtained} / ${totalMax}`;
+      document.getElementById('pdf-total-pct').textContent = `${totalPct}%`;
+      document.getElementById('pdf-act-done').textContent = `${actDoneCount}/3`;
+      document.getElementById('pdf-act-undone').textContent = `${actUndoneCount}`;
+      document.getElementById('pdf-act-marks').textContent = `${actMarks} / 30`;
+      document.getElementById('pdf-game-status').textContent = state.gameCompleted ? 'සම්පූර්ණයි' : 'සම්පූර්ණ කර නැත';
+      document.getElementById('pdf-game-marks').textContent = `${gameMarks} / 80`;
+      document.getElementById('pdf-quiz-status').textContent =
+        `${qs.completed ? 'සම්පූර්ණයි' : 'සම්පූර්ණ කර නැත'} • නිවැරදි: ${qs.correctCount}, වැරදි: ${qs.wrongCount}`;
+      document.getElementById('pdf-quiz-marks').textContent = `${qs.marks} / ${qs.maxMarks}`;
+    }
+
+    // PDF Report Print Trigger
+    document.getElementById('btn-download-pdf').addEventListener('click', () => {
+      updateProgressAndSummary();
+      window.print();
+    });
+  </script>
+</body>
+</html>
